@@ -25,7 +25,7 @@ void loop() {
 
   if (light_sensor == 1 && !light_state) {
       light_state = true;
-      Serial.println(left_counter++);
+      left_counter++;
     } else if (light_sensor == 0 && light_state) {
       light_state = false;
     }
@@ -34,23 +34,23 @@ void loop() {
 void _move(char control){
   switch (control) {
     case 'd':
-      analogWrite(pwmX, 80);
-      Serial.println("Right");
+      analogWrite(pwmX, 95);
+      left_counter = 0;
       break;
     case 'a':
-      analogWrite(pwmX, 190);
-      Serial.println("Left");
+      analogWrite(pwmX, 170);
+      left_counter = 0;
       break;
     case 'w':
-      analogWrite(pwmY, 190);
-      analogWrite(pwmX, 145);
-      Serial.println("Forward");
+      analogWrite(pwmY, 180);
+      left_counter = 0;
       break;
     case 's':
       analogWrite(pwmY, 80);
-      Serial.println("Backward");
+      left_counter = 0;
       break;
      case 'p':
+      left_counter = 0;
       analogWrite(pwmY, 135);
       analogWrite(pwmX, 135);
       break;
