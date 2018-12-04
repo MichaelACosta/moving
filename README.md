@@ -26,24 +26,13 @@ pwm 205 --> máximo frente e esquerda
 
 ## Controles de Movimento
 
-O movimento é dado pelo envio de comandos do ROS no canal movement, interpretado pela função getDirectionFromTopic. Este possui a base:
-
-p: Parado;
-w: Frente;
-s: Ré;
-d: Direita;
-a: Esquerda;
-
-Cada troca de estágio é executada independente com velocidade estimada pelo PWM já citado em dois canais, X e Y.
+O movimento é dado pelo envio de comandos do ROS no canal channel_x e channel_y, interpretado pela função getDirectionFromTopicX e getDirectionFromTopicY.
+O valor recebido nos canais citados acima são passados para as função moveX e moveY, na qual coloca o valor em suas respectivas portas PWM.
 
 ## Odômetro
 
-O cálculo do odômetro é zerado em cada troca de estágio, assim, se é dado o comando de movimento para frente, o contador do odômetro inicia em zero, quando posto em neutro (parado), o contador volta para zero.
-
-A ideia é manter o controle de movimento por estágios nos arduinos para então manter o controle geral do odômetro no ROS.
+O cálculo do odômetro é continue e passado para ROS.
 
 ## ROS
 
 O ROS utiliza o canal left_sensor para captura dos dados da roda esquerda.
-
-Esse valor é zerado no arduino a cada troca de comando, como citado acima, o código do ROS que  recebe estes valores mantêm um contador geral para tomada de decisão e avaliação de LOG de execução.
