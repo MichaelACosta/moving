@@ -1,19 +1,24 @@
 #include <ros.h>
-#include <std_msgs/String.h>
+#include <std_msgs/Int16.h>
 #define pwmY 5
 #define pwmX 6
-#define light_port 8
+#define light_port 12
+
+void getDirectionFromTopicX(const std_msgs::Int16 &pwm) {
+  moveX(pwm.data);
+}
+
+void getDirectionFromTopicY(const std_msgs::Int16 &pwm) {
+  moveY(pwm.data);
+}
 
 ros::NodeHandle  node;
-std_msgs::String light_msg;
+std_msgs::Int16 light_msg;
 ros::Publisher light_pub("left_sensor", &light_msg);
-ros::Subscriber<std_msgs::String> movement_sub("movement", &getDirectionFromTopic);
+ros::Subscriber<std_msgs::Int16> movement_x("channel_x", &getDirectionFromTopicX);
+ros::Subscriber<std_msgs::Int16> movement_y("channel_y", &getDirectionFromTopicY);
 unsigned int left_counter = 0; 
 bool light_state = false;
-
-void getDirectionFromTopic(const std_msgs::String &direction_msg) {
-  _move(direction_msg.data[0]);
-}
 
 void setup() {
   Serial.begin(9600);
@@ -24,16 +29,15 @@ void setup() {
   analogWrite(pwmX, 135);
   node.initNode();
   node.advertise(light_pub);
-  node.subscribe(movement_sub);
+  node.subscribe(movement_x);
+  node.subscribe(movement_y);
 }
 
 void loop() {
   int light_sensor = digitalRead(light_port);
   if (light_sensor == 1 && !light_state) {
     light_state = true;
-    char buffer[5];
-    String(left_counter++).toCharArray(buffer, 5);
-    light_msg.data = buffer;
+    light_msg.data = left_counter++;
     light_pub.publish(&light_msg);
   } else if (light_sensor == 0 && light_state) {
     light_state = false;
@@ -41,28 +45,10 @@ void loop() {
   node.spinOnce();
 }
 
-void _move(char control){
-  switch (control) {
-    case 'd':
-      analogWrite(pwmX, 95);
-      left_counter = 0;
-      break;
-    case 'a':
-      analogWrite(pwmX, 170);
-      left_counter = 0;
-      break;
-    case 'w':
-      analogWrite(pwmY, 180);
-      left_counter = 0;
-      break;
-    case 's':
-      analogWrite(pwmY, 80);
-      left_counter = 0;
-      break;
-     case 'p':
-      left_counter = 0;
-      analogWrite(pwmY, 135);
-      analogWrite(pwmX, 135);
-      break;
-  }
+void moveX(int pwm){
+  analogWrite(pwmX, pwm);
+}
+
+void moveY(int pwm){
+  analogWrite(pwmY, pwm);
 }
