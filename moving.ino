@@ -7,6 +7,9 @@
 #define stopped 135
 #define odometryPin 13
 
+unsigned int left_counter = 0;
+bool odometry_state = false;
+
 void getDirectionFromTopicX(const std_msgs::Int16 &pwm) {
   moveX(pwm.data);
 }
@@ -15,8 +18,9 @@ void getDirectionFromTopicY(const std_msgs::Int16 &pwm) {
   moveY(pwm.data);
 }
 
-void getStatusMoviment(const std_msgs::Bool &status) {
-  stopCounter(status.data);
+void clearCounter(const std_msgs::Bool &shouldClear) {
+  if (shouldClear.data)
+    left_counter = 0;
 }
 
 ros::NodeHandle  node;
@@ -24,10 +28,7 @@ std_msgs::Int16 value_odometry;
 ros::Publisher odometry_pub("left_sensor", &value_odometry);
 ros::Subscriber<std_msgs::Int16> movement_x("channel_x", &getDirectionFromTopicX);
 ros::Subscriber<std_msgs::Int16> movement_y("channel_y", &getDirectionFromTopicY);
-ros::Subscriber<std_msgs::Bool> status_movement("pattern", &getStatusMoviment);
-
-unsigned int left_counter = 0;
-bool odometry_state = false;
+ros::Subscriber<std_msgs::Bool> clear_counter("pattern", &clearCounter);
 
 void setup() {
   Serial.begin(9600);
@@ -40,7 +41,7 @@ void setup() {
   node.advertise(odometry_pub);
   node.subscribe(movement_x);
   node.subscribe(movement_y);
-  node.subscribe(status_movement);
+  node.subscribe(clear_counter);
 }
 
 void loop() {
@@ -61,10 +62,4 @@ void moveX(int pwm) {
 
 void moveY(int pwm) {
   analogWrite(pwmPinY, pwm);
-}
-
-vois stopCounter(status) {
-  if (status === true) {
-    left_counter = 0;
-  }
 }
