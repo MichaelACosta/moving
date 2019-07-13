@@ -1,5 +1,5 @@
 #include <ros.h>
-#include <std_msgs/String.h>
+#include <std_msgs/Int16.h>
 #include <std_msgs/Bool.h>
 
 #define pwmPinY 5
@@ -21,23 +21,25 @@ void clearCounter(const std_msgs::Bool &shouldClear)
   }
 }
 
-void getDirectionFromTopicX(const std_msgs::String &pwm)
+void getDirectionFromTopicX(const std_msgs::Int16 &pwm)
 {
-  char value[] = strtok(pwm.data ' ');
-  moveX(atoi(value[0]));
-  pulse = atoi(value[1]);
+  moveX(pwm.data);
 }
 
-void getDirectionFromTopicY(const std_msgs::String &pwm)
+void getDirectionFromTopicY(const std_msgs::Int16 &pwm)
 {
-  char value[] = strtok(pwm.data ' ');
-  moveY(atoi(value[0]));
-  pulse = atoi(value[1]);
+  moveY(pwm.data);
+}
+
+void getPulse(const std_msgs::Int16 &valuePulse)
+{
+  setPulse(valuePulse.data);
 }
 
 ros::NodeHandle node;
-ros::Subscriber<std_msgs::String> movement_x("channel_x", &getDirectionFromTopicX);
-ros::Subscriber<std_msgs::String> movement_y("channel_y", &getDirectionFromTopicY);
+ros::Subscriber<std_msgs::Int16> movement_x("channel_x", &getDirectionFromTopicX);
+ros::Subscriber<std_msgs::Int16> movement_y("channel_y", &getDirectionFromTopicY);
+ros::Subscriber<std_msgs::Int16> value_pulse("pulse", &getPulse);
 ros::Subscriber<std_msgs::Bool> clear_counter("pattern", &clearCounter);
 
 void setup()
@@ -52,6 +54,7 @@ void setup()
   node.initNode();
   node.subscribe(movement_x);
   node.subscribe(movement_y);
+  node.subscribe(value_pulse);
   node.subscribe(clear_counter);
   attachInterrupt(digitalPinToInterrupt(odometryPinRight), counterRight, RISING);
   attachInterrupt(digitalPinToInterrupt(odometryPinLeft), counterLeft, RISING);
@@ -85,4 +88,9 @@ void moveX(int pwm)
 void moveY(int pwm)
 {
   analogWrite(pwmPinY, pwm);
+}
+
+void setPulse(int valuePulse)
+{
+  pulse = valuePulse;
 }
