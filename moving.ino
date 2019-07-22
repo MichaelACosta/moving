@@ -1,6 +1,5 @@
 #include <ros.h>
 #include <std_msgs/Int16.h>
-#include <std_msgs/Bool.h>
 
 #define pwmPinY 5
 #define pwmPinX 6
@@ -11,15 +10,6 @@
 unsigned int right_counter = 0;
 unsigned int left_counter = 0;
 unsigned int pulse = 0;
-
-void clearCounter(const std_msgs::Bool &shouldClear)
-{
-  if (shouldClear.data)
-  {
-    right_counter = 0;
-    left_counter = 0;
-  }
-}
 
 void getDirectionFromTopicX(const std_msgs::Int16 &pwm)
 {
@@ -40,7 +30,6 @@ ros::NodeHandle node;
 ros::Subscriber<std_msgs::Int16> movement_x("channel_x", &getDirectionFromTopicX);
 ros::Subscriber<std_msgs::Int16> movement_y("channel_y", &getDirectionFromTopicY);
 ros::Subscriber<std_msgs::Int16> value_pulse("pulse", &getPulse);
-ros::Subscriber<std_msgs::Bool> clear_counter("pattern", &clearCounter);
 
 void setup()
 {
@@ -55,14 +44,13 @@ void setup()
   node.subscribe(movement_x);
   node.subscribe(movement_y);
   node.subscribe(value_pulse);
-  node.subscribe(clear_counter);
   attachInterrupt(digitalPinToInterrupt(odometryPinRight), counterRight, RISING);
   attachInterrupt(digitalPinToInterrupt(odometryPinLeft), counterLeft, RISING);
 }
 
 void loop()
 {
-  if ((right_counter >= pulse) || (left_counter >= pulse))
+  if ((right_counter >= pulse) && (left_counter >= pulse))
   {
     moveX(stopped);
     moveY(stopped);
@@ -92,5 +80,7 @@ void moveY(int pwm)
 
 void setPulse(int valuePulse)
 {
+  right_counter = 0;
+  left_counter = 0;
   pulse = valuePulse;
 }
