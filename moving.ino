@@ -11,18 +11,24 @@ unsigned int right_counter = 0;
 unsigned int left_counter = 0;
 unsigned int pulse = 0;
 
+bool move_flag = false;
+bool pulse_flag = false;
+
 void getDirectionFromTopicX(const std_msgs::Int16 &pwm)
 {
+  move_flag = true;
   moveX(pwm.data);
 }
 
 void getDirectionFromTopicY(const std_msgs::Int16 &pwm)
 {
+  move_flag = true;
   moveY(pwm.data);
 }
 
 void getPulse(const std_msgs::Int16 &valuePulse)
 {
+  pulse_flag = true;
   setPulse(valuePulse.data);
 }
 
@@ -50,13 +56,18 @@ void setup()
 
 void loop()
 {
-  if ((right_counter >= pulse) && (left_counter >= pulse))
+  if (move_flag && pulse_flag && (left_counter >= pulse) && (right_counter >= pulse))
   {
     moveX(stopped);
     moveY(stopped);
+    move_flag = false;
+    pulse_flag = false;
   }
+  
+  
   node.spinOnce();
 }
+
 
 void counterRight()
 {
